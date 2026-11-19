@@ -31,6 +31,26 @@ class AuthController {
             )
         )
 
+    });
+    login = asyncHandler(async (req: Request, res: Response): Promise<Response> => {
+
+        const { email, password } = req.body;
+
+        const { user, accessToken, refreshToken } = await AuthServices.login({ email, password });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+
+        return res.status(200).json(
+            new ApiResponse(
+                "login Successfull",
+                200,
+                { user: sanitizeResponse(user), accessToken }
+            )
+        )
+
     })
 };
 

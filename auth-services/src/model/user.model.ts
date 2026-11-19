@@ -16,7 +16,7 @@ const userSchema = Schema.create({
         trim: true,
         unique: true
     },
-    passwprd: {
+    password: {
         type: String,
         required: [true, "password is required"],
         trim: true
@@ -26,11 +26,11 @@ const userSchema = Schema.create({
 });
 
 userSchema.pre("save", async function () {
-    if (!this.isModified("passwprd")) {
+    if (!this.isModified("password")) {
         return
     };
 
-    this.passwprd = await bcrypt.hash(this.passwprd, env.saltRound)
+    this.password = await bcrypt.hash(this.password, env.saltRound)
 })
 
 type userType = InferSchemaType<typeof userSchema>

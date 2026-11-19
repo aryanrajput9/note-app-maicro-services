@@ -1,6 +1,7 @@
 import AuthRepository from "../repository/auth.repository.js";
 import ApiError from "../utils/api-error.js";
-import { generateRefreshToken } from "../utils/jwt.js";
+import { comparePassword } from "../utils/bycrpt.js";
+import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
 
 
 class AuthServices {
@@ -28,6 +29,35 @@ class AuthServices {
 
 
         return { user, refreshToken }
+    };
+    login = async (input: { email: string, password: string }) => {
+
+        if (typeof input.email === "string") {
+            throw new ApiError("senter valid email", 401)
+        };
+        if (typeof input.password === "string") {
+            throw new ApiError("enter valid password", 401)
+        };
+
+        const user = await AuthRepository.findByEmail(input.email);
+
+        if (!user) {
+            throw new ApiError("user not found", 404)
+        };
+
+        const comparePass = await comparePassword(input.password, user.password)
+
+        if (!comparePass) {
+            throw new ApiError("Invalid password", 401);
+        };
+
+        const accessToken = generateAccessToken({ id: user._id, email: user.email });
+
+        const refreshToken = generateRefreshToken({ id: user._id, email: user.email });
+
+        return {
+            user, accessToken, refreshToken
+        }
     }
 }
 
